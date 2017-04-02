@@ -1,54 +1,83 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- WARNING: Eclipse auto-generated file.
-              Any modifications will be overwritten.
-              To include a user specific buildfile here, simply create one in the same
-              directory with the processing instruction <?eclipse.ant.import?>
-              as the first entry and export the buildfile again. --><project basedir="." default="build" name="LearningAnt">
-    <property environment="env"/>
-    <property name="ECLIPSE_HOME" value="../../Apps/eclipse-jee-mars-R-win32-x86_64/eclipse/"/>
-    <property name="debuglevel" value="source,lines,vars"/>
-    <property name="target" value="1.7"/>
-    <property name="source" value="1.7"/>
-    <path id="JUnit 3.libraryclasspath">
-        <pathelement location="${ECLIPSE_HOME}plugins/org.junit_4.12.0.v201504281640/junit.jar"/>
-    </path>
-    <path id="LearningAnt.classpath">
-        <pathelement location="bin"/>
-        <path refid="JUnit 3.libraryclasspath"/>
-    </path>
-    <target name="init">
-        <mkdir dir="bin"/>
-        <copy includeemptydirs="false" todir="bin">
-            <fileset dir="src">
-                <exclude name="**/*.java"/>
-            </fileset>
-        </copy>
-    </target>
-    <target name="clean">
-        <delete dir="bin"/>
-    </target>
-    <target depends="clean" name="cleanall"/>
-    <target depends="build-subprojects,build-project" name="build"/>
-    <target name="build-subprojects"/>
-    <target depends="init" name="build-project">
-        <echo message="${ant.project.name}: ${ant.file}"/>
-        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
-            <src path="src"/>
-            <classpath refid="LearningAnt.classpath"/>
-        </javac>
-    </target>
-    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
-    <target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
-        <copy todir="${ant.library.dir}">
-            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
-        </copy>
-        <unzip dest="${ant.library.dir}">
-            <patternset includes="jdtCompilerAdapter.jar"/>
-            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
-        </unzip>
-    </target>
-    <target description="compile project with Eclipse compiler" name="build-eclipse-compiler">
-        <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
-        <antcall target="build"/>
-    </target>
+<project name="AntJarFile" default="dist" basedir=".">
+<description>
+    Ant Simple Sample File to teach a very tough customer Ana
+</description>
+	<!-- set global properties for this build -->	
+	<property name="comt.ana.antlearning" value="LearningAnt"/>
+	<property name="main_class_name" value="LearnAnt"/>
+	<property name="jarname"  value="${comt.ana.antlearning}"/>
+	
+	<!-- set directories for global usage, throughout the ant file -->
+	
+	<property name="src" location="src"/>
+	<property name="test" location="test"/>
+	<property name="build" location="build"/>
+	<property name="dist"  location="dist"/>
+	<property name="lib"  location="lib"/>
+	
+	
+	<path id="project.classpath">
+		<pathelement location="${build}" />
+		<pathelement location="${lib}" />
+	</path>
+	
+	<target name="init">
+		<!-- Create the time stamp -->
+		<tstamp/>
+		<!-- Create directories if needed -->
+		<mkdir dir="${src}"/>
+		<mkdir dir="${test}"/>
+		<mkdir dir="${build}"/>
+		<mkdir dir="${dist}"/>
+	</target>
+	
+	<target name="compile" depends="init" description="compile the source java files" >
+		<!-- Compile the java code from ${src} into ${build} -->
+		<javac debug="true" srcdir="${src}" destdir="${build}" includeantruntime="true" classpathref="project.classpath"/>
+		<!-- Copy files from ${src} into ${build} -->
+		<copy todir="${build}">
+			<fileset dir="${src}">
+				<exclude name="**/*.java"/>
+				</fileset>
+			</copy>
+		</target>
+	
+	 <!-- only for pre prod for unit testing of code-->
+	
+	<target name="compiletest" depends="compile" description="compile the tests " >
+			<javac debug="true" srcdir="${test}" destdir="${build}" classpathref="project.classpath" includeantruntime="true" />
+
+	</target>
+	
+	 <!-- only for pre prod for unit testing of code-->
+
+	<target name="test" depends="compiletest" description="run the tests " >
+	        <junit printsummary="yes" fork="yes" haltonfailure="yes">
+	        <formatter type="plain"/>
+	         <batchtest>
+	         <fileset dir="${test}">
+	         <include name="**/*Test*.java"/>
+	         	
+	      </fileset>
+	   </batchtest>
+	      <classpath refid="${project.classpath}" />
+	     </junit>
+	</target>
+
+	<target name="dist" depends="compile" description="generate the distribution" >
+			<!-- Create the distribution directory -->
+			<!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
+	<jar jarfile="${dist}/${jarname}-${DSTAMP}.jar" basedir="${build}">
+		<manifest>
+			<attribute name="Main-Class" value="${main_class_name}"/>
+	 	</manifest>
+	</jar>
+	<copy file="${dist}/${jarname}-${DSTAMP}.jar" tofile="./${jarname}.jar" overwrite="true"/>
+	</target>
+	
+	<target name="clean" description="clean up" >
+			<!-- Delete the ${build} directory-->
+			<delete dir="${build}"/>
+	</target>
+	
 </project>
